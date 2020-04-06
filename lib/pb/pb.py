@@ -10,6 +10,6 @@ class Table:
         """
         Display data in tabular format with headers using tabulate
         :param fmt:
-        :return: 
+        :return:
         """
         print(tabulate(self.data, headers=self.headers, tablefmt="plain"))

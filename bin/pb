@@ -4,3 +4,32 @@
 import argparse
 import os
 import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../lib/pb"))
+import pb  # noqa: E402
+
+
+def main(args, raw_args):
+    print(args)
+    exit(0)
+
+
+def parse_arguments():
+    """
+    Figure out argparse's help from docstring thing
+    :return:
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "action",
+        choices=["read", "list"],
+        help=f"Action to take"
+    )
+
+    args, extra_args = parser.parse_known_args()
+    return args, extra_args
+
+
+if __name__ == "__main__":
+    args, cmd_args = parse_arguments()
+    main(args, cmd_args)
