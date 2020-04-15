@@ -12,3 +12,19 @@ Usage:
 `pb help` - Display help
 
 `pb health` - Health check back end system
+
+`pb create` - Create operations
+
+`pb read` - Read operations
+
+`pb update` - Update operations
+
+`pb delete` - Delete operations
+
+`pb [create | update | read | delete] machine` - Machine specific operations
+
+`pb [create | update | read | delete] player` - Player specific operations
+
+`pb [create | update | read | delete] location` - Location specific operations
+
+`--no-headers` - Remove headers from output

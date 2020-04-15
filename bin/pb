@@ -10,7 +10,21 @@ import pb  # noqa: E402
 
 
 def main(args, raw_args):
-    print(args)
+    """
+    Sample function.
+
+    Parameters:
+        get_all:
+            Get all resources.
+        get: string
+            Get specific resource.
+
+    """
+    print("RAW ARGS: {}".format(raw_args))
+    playfield_service = pb.PlayfieldService(args.host)
+    action = playfield_service.playfield_actions()[args.action]
+    action()
+
     exit(0)
 
 
@@ -19,12 +33,17 @@ def parse_arguments():
     Figure out argparse's help from docstring thing
     :return:
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=main.__doc__,
+        prog='pb'
+    )
     parser.add_argument(
         "action",
-        choices=["read", "list"],
-        help=f"Action to take"
+        choices=pb.PlayfieldService.action_names(),
+        help=f"Action to take {pb.PlayfieldService.action_names()}",
     )
+    parser.add_argument("--host", help="API hostname", default="127.0.0.1")
 
     args, extra_args = parser.parse_known_args()
     return args, extra_args
