@@ -11,9 +11,13 @@ class PlayfieldService:
 
     @staticmethod
     def action_names():
-        return {"system", "machine", "player"}
+        return {"create", "read", "update", "delete"}
 
-    def playfield_actions(self):
+    @staticmethod
+    def resource_names():
+        return {"system", "machine", "player", "location"}
+
+    def playfield_operations(self):
         """
         Returns a dictionary mapping action name strings to functions.
 
@@ -21,12 +25,12 @@ class PlayfieldService:
         :rtype: Function
         """
         mapping = {}
-        for name in PlayfieldService.action_names():
+        for name in PlayfieldService.resource_names():
             mapping[name] = getattr(self, "pb_" + name)
 
         return mapping
 
-    def pb_system(self):
+    def pb_system(self, action):
         sys_check = SystemCheck(self.host)
 
         info = sys_check.get_info()
@@ -64,7 +68,7 @@ class PlayfieldService:
             table.display()
             print("Error connecting to server")
 
-    def pb_machine(self):
+    def pb_machine(self, action):
         machine = Machine(self.host)
 
         all_machines = machine.get_all_machines()
@@ -75,10 +79,25 @@ class PlayfieldService:
         else:
             print("Error connecting to server")
 
-    def pb_player(self):
+    def pb_player(self, action):
         player = Player(self.host)
 
         all_players = player.get_all_players()
+
+        if all_players is not "Error":
+            player.display_players(all_players)
+        else:
+            print("Error connecting to server")
+
+    def pb_location(self, action):
+        location = Location(self.host)
+
+        all_locations = location.get_all_locations()
+
+        if all_locations is not "Error":
+            location.display_locations(all_locations)
+        else:
+            print("Error connecting to server")
 
 
 class Machine:
@@ -132,11 +151,53 @@ class Player:
     def __init__(self, host):
         self.host = host
 
+    @staticmethod
+    def display_players(player_data):
+        headers = [
+            "player_id",
+            "nick",
+            "name",
+            "email",
+            "phone",
+            "location",
+            "ifpanumber",
+            "pinside",
+            "notes",
+            "status",
+            "active"
+        ]
+        rows = []
+
+        player_json = json.loads(player_data)
+
+        for player in player_json['data']:
+            rows.append(
+                [
+                    player['player_id'],
+                    player['nick'],
+                    player['name'],
+                    player['email'],
+                    player['phone'],
+                    player['location'],
+                    player['ifpanumber'],
+                    player['pinside'],
+                    player['notes'],
+                    player['status'],
+                    player['active']
+                ]
+            )
+
+        table = Table(headers, rows)
+        table.display()
+
     def get_all_players(self):
 
         url = f'http://{self.host}/api/v1/resources/player/all_players'
 
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
 
         if response.status_code == 200:
             return response.json()
@@ -148,11 +209,45 @@ class Location:
     def __init__(self, host):
         self.host = host
 
+    @staticmethod
+    def display_locations(location_data):
+        headers = [
+            "location_id",
+            "name",
+            "address",
+            "addressPrivate",
+            "notes",
+            "locType",
+            "active"
+        ]
+        rows = []
+
+        location_json = json.loads(location_data)
+
+        for location in location_json['data']:
+            rows.append(
+                [
+                    location['location_id'],
+                    location['name'],
+                    location['address'],
+                    location['addressPrivate'],
+                    location['notes'],
+                    location['locType'],
+                    location['active']
+                ]
+            )
+
+        table = Table(headers, rows)
+        table.display()
+
     def get_all_locations(self):
 
         url = f'http://{self.host}/api/v1/resources/location/all_locations'
 
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
 
         if response.status_code == 200:
             return response.json()

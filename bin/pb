@@ -22,8 +22,9 @@ def main(args, raw_args):
     """
     print("RAW ARGS: {}".format(raw_args))
     playfield_service = pb.PlayfieldService(args.host)
-    action = playfield_service.playfield_actions()[args.action]
-    action()
+
+    operation = playfield_service.playfield_operations()[args.resource]
+    operation(args.action)
 
     exit(0)
 
@@ -39,11 +40,17 @@ def parse_arguments():
         prog='pb'
     )
     parser.add_argument(
+        "resource",
+        choices=pb.PlayfieldService.resource_names(),
+        help=f"Resource to inspect {pb.PlayfieldService.resource_names()}",
+    )
+    parser.add_argument(
         "action",
         choices=pb.PlayfieldService.action_names(),
         help=f"Action to take {pb.PlayfieldService.action_names()}",
     )
     parser.add_argument("--host", help="API hostname", default="127.0.0.1")
+    parser.add_argument("--verbose", help="Expand output to include everything")
 
     args, extra_args = parser.parse_known_args()
     return args, extra_args
