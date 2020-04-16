@@ -1,5 +1,7 @@
 import requests
 from tabulate import tabulate
+import json
+from pprint import pprint
 
 
 class PlayfieldService:
@@ -66,6 +68,29 @@ class PlayfieldService:
         machine = Machine(self.host)
 
         all_machines = machine.get_all_machines()
+
+        headers = [
+            "id",
+            "name",
+            "abbr",
+            "manufacturer",
+        ]
+        rows = []
+
+        machine_json = json.loads(all_machines)
+
+        for machine in machine_json['data']:
+            rows.append(
+                [
+                    machine['machine_id'],
+                    machine['name'],
+                    machine['abbr'],
+                    machine['manufacturer']
+                ]
+            )
+
+        table = Table(headers, rows)
+        table.display()
 
     def pb_player(self):
         player = Player(self.host)
