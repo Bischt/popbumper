@@ -69,6 +69,24 @@ class PlayfieldService:
 
         all_machines = machine.get_all_machines()
 
+        # Display output unless error
+        if all_machines is not "Error":
+            machine.display_machines(all_machines)
+        else:
+            print("Error connecting to server")
+
+    def pb_player(self):
+        player = Player(self.host)
+
+        all_players = player.get_all_players()
+
+
+class Machine:
+    def __init__(self, host):
+        self.host = host
+
+    @staticmethod
+    def display_machines(machine_data):
         headers = [
             "id",
             "name",
@@ -77,7 +95,7 @@ class PlayfieldService:
         ]
         rows = []
 
-        machine_json = json.loads(all_machines)
+        machine_json = json.loads(machine_data)
 
         for machine in machine_json['data']:
             rows.append(
@@ -92,21 +110,17 @@ class PlayfieldService:
         table = Table(headers, rows)
         table.display()
 
-    def pb_player(self):
-        player = Player(self.host)
-
-        all_players = player.get_all_players()
-
-
-class Machine:
-    def __init__(self, host):
-        self.host = host
-
     def get_all_machines(self):
-
+        """
+        Retrieve all machines currently in the system
+        :return:
+        """
         url = f'http://{self.host}/api/v1/resources/machine/all_machines'
 
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
 
         if response.status_code == 200:
             return response.json()
