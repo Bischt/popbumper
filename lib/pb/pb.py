@@ -30,11 +30,11 @@ class PlayfieldService:
 
         return mapping
 
-    def pb_system(self, action):
+    def pb_system(self, action, param, param_data):
         sys_check = SystemCheck(self.host)
 
         info = sys_check.get_info()
-
+        print(action)
         headers = [
             "Host",
             "Version",
@@ -68,36 +68,51 @@ class PlayfieldService:
             table.display()
             print("Error connecting to server")
 
-    def pb_machine(self, action):
+    def pb_machine(self, action, param, param_data):
         machine = Machine(self.host)
 
-        all_machines = machine.get_all_machines()
+        if action == "read":
 
-        # Display output unless error
-        if all_machines is not "Error":
-            machine.display_machines(all_machines)
-        else:
-            print("Error connecting to server")
+            if param == "all":
+                all_machines = machine.get_all_machines()
 
-    def pb_player(self, action):
+                # Display output unless error
+                if all_machines is not "Error":
+                    machine.display_machines(all_machines)
+                else:
+                    print("Error connecting to server")
+            elif param == "by_id":
+                machine_by_id = machine.get_machine_by_id(param_data)
+
+                # Display output unless error
+                if machine_by_id is not "Error":
+                    machine.display_machines(machine_by_id)
+                else:
+                    print("Error connecting to server")
+            else:
+                print("Invalid Operation")
+
+    def pb_player(self, action, param, param_data):
         player = Player(self.host)
 
-        all_players = player.get_all_players()
+        if action == "read":
+            all_players = player.get_all_players()
 
-        if all_players is not "Error":
-            player.display_players(all_players)
-        else:
-            print("Error connecting to server")
+            if all_players is not "Error":
+                player.display_players(all_players)
+            else:
+                print("Error connecting to server")
 
-    def pb_location(self, action):
+    def pb_location(self, action, param, param_data):
         location = Location(self.host)
 
-        all_locations = location.get_all_locations()
+        if action == "read":
+            all_locations = location.get_all_locations()
 
-        if all_locations is not "Error":
-            location.display_locations(all_locations)
-        else:
-            print("Error connecting to server")
+            if all_locations is not "Error":
+                location.display_locations(all_locations)
+            else:
+                print("Error connecting to server")
 
 
 class Machine:
@@ -136,6 +151,20 @@ class Machine:
         """
         url = f'http://{self.host}/api/v1/resources/machine/all_machines'
 
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_machine_by_id(self, machine_id):
+
+        url = f'http://{self.host}/api/v1/resources/machine/machine_by_id/{machine_id}'
+        print(url)
         try:
             response = requests.get(url)
         except requests.ConnectionError as e:

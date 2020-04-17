@@ -21,11 +21,11 @@ Usage:
 
 `pb delete` - Delete operations
 
-`pb read machine [all | byid]` - Machine specific operations
+`pb read machine [all | by_id | by_name | by_abbr | by_manufacturer] [<value>]` - Machine read operations
 
-`pb [create | update | read | delete] player` - Player specific operations
+`pb read player [all | by_id | by_name] [<value>]` - Player read operations
 
-`pb [create | update | read | delete] location` - Location specific operations
+`pb read location [all | by_id | by_name] [<value>]` - Location read operations
 
 `--no-headers` - Remove headers from output
 `--verbose` - Output all info (defaults to simpler display)
