@@ -1,6 +1,7 @@
 import requests
 from tabulate import tabulate
 import json
+import urllib.parse
 from pprint import pprint
 
 
@@ -82,13 +83,49 @@ class PlayfieldService:
                 else:
                     print("Error connecting to server")
             elif param == "by_id":
-                machine_by_id = machine.get_machine_by_id(param_data)
+                if not isinstance(param_data, int):
+                    machine_by_id = machine.get_machine_by_id(param_data)
 
-                # Display output unless error
-                if machine_by_id is not "Error":
-                    machine.display_machines(machine_by_id)
+                    # Display output unless error
+                    if machine_by_id is not "Error":
+                        machine.display_machines(machine_by_id)
+                    else:
+                        print("Error connecting to server")
                 else:
-                    print("Error connecting to server")
+                    print("ID must be a valid integer")
+            elif param == "by_name":
+                if param_data != "":
+                    machine_by_name = machine.get_machine_by_name(param_data)
+
+                    # Display output unless error
+                    if machine_by_name is not "Error":
+                        machine.display_machines(machine_by_name)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("You must enter a name to search for")
+            elif param == "by_abbr":
+                if param_data != "":
+                    machine_by_abbr = machine.get_machine_by_abbr(param_data)
+
+                    # Display output unless error
+                    if machine_by_abbr is not "Error":
+                        machine.display_machines(machine_by_abbr)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("You must enter an abbr to search for")
+            elif param == "by_manufacturer":
+                if param_data != "":
+                    machine_by_manufacturer = machine.get_machine_by_manufacturer(param_data)
+
+                    # Display output unless error
+                    if machine_by_manufacturer is not "Error":
+                        machine.display_machines(machine_by_manufacturer)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("You must enter an manufacturer to search for")
             else:
                 print("Invalid Operation")
 
@@ -96,23 +133,75 @@ class PlayfieldService:
         player = Player(self.host)
 
         if action == "read":
-            all_players = player.get_all_players()
 
-            if all_players is not "Error":
-                player.display_players(all_players)
+            if param == "all":
+                all_players = player.get_all_players()
+
+                if all_players is not "Error":
+                    player.display_players(all_players)
+                else:
+                    print("Error connecting to server")
+            elif param == "by_id":
+                if not isinstance(param_data, int):
+                    player_by_id = player.get_player_by_id(param_data)
+
+                    # Display output unless error
+                    if player_by_id is not "Error":
+                        player.display_players(player_by_id)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("ID must be a valid integer")
+            elif param == "by_name":
+                if param_data != "":
+                    player_by_name = player.get_player_by_name(param_data)
+
+                    # Display output unless error
+                    if player_by_name is not "Error":
+                        player.display_players(player_by_name)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("You must enter a name to search for")
             else:
-                print("Error connecting to server")
+                print("Invalid Operation")
 
     def pb_location(self, action, param, param_data):
         location = Location(self.host)
 
         if action == "read":
-            all_locations = location.get_all_locations()
 
-            if all_locations is not "Error":
-                location.display_locations(all_locations)
+            if param == "all":
+                all_locations = location.get_all_locations()
+
+                if all_locations is not "Error":
+                    location.display_locations(all_locations)
+                else:
+                    print("Error connecting to server")
+            elif param == "by_id":
+                if not isinstance(param_data, int):
+                    location_by_id = location.get_location_by_id(param_data)
+
+                    # Display output unless error
+                    if location_by_id is not "Error":
+                        location.display_locations(location_by_id)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("ID must be a valid integer")
+            elif param == "by_name":
+                if param_data != "":
+                    location_by_name = location.get_location_by_name(param_data)
+
+                    # Display output unless error
+                    if location_by_name is not "Error":
+                        location.display_locations(location_by_name)
+                    else:
+                        print("Error connecting to server")
+                else:
+                    print("You must enter a name to search for")
             else:
-                print("Error connecting to server")
+                print("Invalid Operation")
 
 
 class Machine:
@@ -164,7 +253,49 @@ class Machine:
     def get_machine_by_id(self, machine_id):
 
         url = f'http://{self.host}/api/v1/resources/machine/machine_by_id/{machine_id}'
-        print(url)
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_machine_by_name(self, machine_name):
+
+        url = f'http://{self.host}/api/v1/resources/machine/machine_by_name/{machine_name}'
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_machine_by_abbr(self, machine_abbr):
+
+        url = f'http://{self.host}/api/v1/resources/machine/machine_by_abbr/{machine_abbr}'
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_machine_by_manufacturer(self, machine_manufacturer):
+
+        url = f'http://{self.host}/api/v1/resources/machine/machine_by_manufacturer/{urllib.parse.quote(machine_manufacturer)}'
+
         try:
             response = requests.get(url)
         except requests.ConnectionError as e:
@@ -233,6 +364,34 @@ class Player:
         else:
             return None
 
+    def get_player_by_id(self, player_id):
+
+        url = f'http://{self.host}/api/v1/resources/player/player_by_id/{player_id}'
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_player_by_name(self, player_name):
+
+        url = f'http://{self.host}/api/v1/resources/player/player_by_name/{player_name}'
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
 
 class Location:
     def __init__(self, host):
@@ -272,6 +431,34 @@ class Location:
     def get_all_locations(self):
 
         url = f'http://{self.host}/api/v1/resources/location/all_locations'
+
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_location_by_id(self, location_id):
+
+        url = f'http://{self.host}/api/v1/resources/location/location_by_id/{location_id}'
+        print(url)
+        try:
+            response = requests.get(url)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+    def get_location_by_name(self, location_name):
+
+        url = f'http://{self.host}/api/v1/resources/location/location_by_name/{location_name}'
 
         try:
             response = requests.get(url)
