@@ -165,6 +165,10 @@ class PlayfieldService:
                     print("You must enter a name to search for")
             else:
                 print("Invalid Operation")
+        elif action == "create":
+            print("Creating New Player...")
+
+            player.create_new_player()
 
     def pb_location(self, action, param, param_data):
         location = Location(self.host)
@@ -206,7 +210,7 @@ class PlayfieldService:
         elif action == "create":
             print("Creating New Location...")
 
-            new_location = location.create_new_location()
+            location.create_new_location()
 
 
 class Machine:
@@ -397,6 +401,88 @@ class Player:
         else:
             return None
 
+    def create_new_player(self):
+        (nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents) = self._prompt_for_new_player()
+
+        result = self._add_player_to_database(nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents)
+
+        if result is not 200:
+            print("Error connecting to API")
+        else:
+            print("Player added successfully!")
+
+    @staticmethod
+    def _prompt_for_new_player():
+        name = input("Name of player: ")
+        nick = input("Nickname: ")
+        email = input("Email address: ")
+        phone = input("Phone number: ")
+        location = input("Location: ")
+        ifpanumber = ''
+        pinside = ''
+        notes = input("Notes: ")
+        status = 0
+        while True:
+            active = input("Active? (yes/no) ").lower()
+            if active == "yes" or active == "no":
+                break
+        currentrank = 0
+        currentwpprvalue = 0.0
+        bestfinish = 0
+        activeevents = 0
+
+        print("\n\n")
+        print("A player is to be created with the following details:")
+        print("Name: {}".format(name))
+        print("Nickname: {}".format(nick))
+        print("Email: {}".format(email))
+        print("Phone: {}".format(phone))
+        print("Location: {}".format(location))
+        print("Notes: {}".format(notes))
+        print("Active? {}".format(active))
+
+        while True:
+            verify_create = input("Should this location be created? (yes/no) ").lower()
+            if verify_create == "yes" or verify_create == "no":
+                break
+
+        if verify_create == "yes":
+            # Morph some user input values into DB values
+            if active == "yes":
+                active = True
+            else:
+                active = False
+
+            return nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents
+        else:
+            exit(0)
+
+    def _add_player_to_database(self, nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents):
+        print("Adding to database...")
+
+        url = f'http://{self.host}/api/v1/resources/player/add_player'
+        data = dict(name=name,
+                    nick=nick,
+                    email=email,
+                    phone=phone,
+                    location=location,
+                    ifpanumber=ifpanumber,
+                    pinside=pinside,
+                    notes=notes,
+                    status=status,
+                    active=active,
+                    currentrank=currentrank,
+                    currentwpprvalue=currentwpprvalue,
+                    bestfinish=bestfinish,
+                    activeevents=activeevents)
+
+        try:
+            response = requests.post(url, data)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        return response.status_code
+
 
 class Location:
     def __init__(self, host):
@@ -553,10 +639,6 @@ class Location:
             return "Error"
 
         return response.status_code
-        #if response.status_code == 200:
-        #    return response.json()
-        #else:
-        #    return None
 
 
 class SystemCheck:
