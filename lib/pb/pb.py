@@ -203,6 +203,11 @@ class PlayfieldService:
             else:
                 print("Invalid Operation")
 
+        elif action == "create":
+            print("Creating New Location...")
+
+            new_location = location.create_new_location()
+
 
 class Machine:
     def __init__(self, host):
@@ -445,7 +450,7 @@ class Location:
     def get_location_by_id(self, location_id):
 
         url = f'http://{self.host}/api/v1/resources/location/location_by_id/{location_id}'
-        print(url)
+
         try:
             response = requests.get(url)
         except requests.ConnectionError as e:
@@ -469,6 +474,89 @@ class Location:
             return response.json()
         else:
             return None
+
+    def create_new_location(self):
+        (name, address, address_private, notes, loc_type, active) = self._prompt_for_new_location()
+
+        result = self._add_to_database(name, address, address_private, notes, loc_type, active)
+
+        if result is not 200:
+            print("Error connecting to API")
+        else:
+            print("Location added successfully!")
+
+    @staticmethod
+    def _prompt_for_new_location():
+        name = input("Name of location: ")
+        address = input("Address: ")
+        while True:
+            address_private = input("Is the address private? (yes/no) ").lower()
+            if address_private == "yes" or address_private == "no":
+                break
+        notes = input("Notes or special considerations: ")
+        while True:
+            loc_type = input("Location Type? (business or residence) ").lower()
+            if loc_type == "business" or loc_type == "residence":
+                break
+        while True:
+            active = input("Make active? (yes/no) ").lower()
+            if active == "yes" or active == "no":
+                break
+
+        print("\n\n")
+        print("A location is to be created with the following details:")
+        print("Name: {}".format(name))
+        print("Address: {}".format(address))
+        print("Address kept private? {}".format(address_private))
+        print("Notes: {}".format(notes))
+        print("Location Type: {}".format(loc_type))
+        print("Location active? {}".format(active))
+
+        while True:
+            verify_create = input("Should this location be created? (yes/no) ").lower()
+            if verify_create == "yes" or verify_create == "no":
+                break
+
+        if verify_create == "yes":
+            # Morph some user input values into DB values
+            if address_private == "yes":
+                address_private = True
+            else:
+                address_private = False
+            if loc_type == "business":
+                loc_type = 1
+            else:
+                loc_type = 2
+            if active == "yes":
+                active = True
+            else:
+                active = False
+
+            return name, address, address_private, notes, loc_type, active
+        else:
+            exit(0)
+
+    def _add_to_database(self, name, address, address_private, notes, loc_type, active):
+        print("Adding to database...")
+
+        url = f'http://{self.host}/api/v1/resources/location/add_location'
+        data = dict(name=name,
+                    address=address,
+                    address_private=address_private,
+                    notes=notes,
+                    locType=loc_type,
+                    active=active)
+
+        try:
+            response = requests.post(url, data)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        return response.status_code
+        #if response.status_code == 200:
+        #    return response.json()
+        #else:
+        #    return None
 
 
 class SystemCheck:
