@@ -75,7 +75,8 @@ class PlayfieldService:
         if action == "read":
 
             if param == "all":
-                all_machines = machine.get_all_machines()
+
+                all_machines = self.api_request(self.host, "get", "machine", "all_machines", None)
 
                 # Display output unless error
                 if all_machines is not "Error":
@@ -84,7 +85,8 @@ class PlayfieldService:
                     print("Error connecting to server")
             elif param == "by_id":
                 if not isinstance(param_data, int):
-                    machine_by_id = machine.get_machine_by_id(param_data)
+
+                    machine_by_id = self.api_request(self.host, "get", "machine", "machine_by_id", param_data)
 
                     # Display output unless error
                     if machine_by_id is not "Error":
@@ -95,7 +97,8 @@ class PlayfieldService:
                     print("ID must be a valid integer")
             elif param == "by_name":
                 if param_data != "":
-                    machine_by_name = machine.get_machine_by_name(param_data)
+
+                    machine_by_name = self.api_request(self.host, "get", "machine", "machine_by_name", param_data)
 
                     # Display output unless error
                     if machine_by_name is not "Error":
@@ -106,7 +109,8 @@ class PlayfieldService:
                     print("You must enter a name to search for")
             elif param == "by_abbr":
                 if param_data != "":
-                    machine_by_abbr = machine.get_machine_by_abbr(param_data)
+
+                    machine_by_abbr = self.api_request(self.host, "get", "machine", "machine_by_abbr", param_data)
 
                     # Display output unless error
                     if machine_by_abbr is not "Error":
@@ -117,7 +121,8 @@ class PlayfieldService:
                     print("You must enter an abbr to search for")
             elif param == "by_manufacturer":
                 if param_data != "":
-                    machine_by_manufacturer = machine.get_machine_by_manufacturer(param_data)
+
+                    machine_by_manufacturer = self.api_request(self.host, "get", "machine", "machine_by_manufacturer", param_data)
 
                     # Display output unless error
                     if machine_by_manufacturer is not "Error":
@@ -135,7 +140,8 @@ class PlayfieldService:
         if action == "read":
 
             if param == "all":
-                all_players = player.get_all_players()
+
+                all_players = self.api_request(self.host, "get", "player", "all_players", None)
 
                 if all_players is not "Error":
                     player.display_players(all_players)
@@ -143,7 +149,8 @@ class PlayfieldService:
                     print("Error connecting to server")
             elif param == "by_id":
                 if not isinstance(param_data, int):
-                    player_by_id = player.get_player_by_id(param_data)
+
+                    player_by_id = self.api_request(self.host, "get", "player", "player_by_id", param_data)
 
                     # Display output unless error
                     if player_by_id is not "Error":
@@ -154,7 +161,8 @@ class PlayfieldService:
                     print("ID must be a valid integer")
             elif param == "by_name":
                 if param_data != "":
-                    player_by_name = player.get_player_by_name(param_data)
+
+                    player_by_name = self.api_request(self.host, "get", "player", "player_by_name", param_data)
 
                     # Display output unless error
                     if player_by_name is not "Error":
@@ -176,7 +184,8 @@ class PlayfieldService:
         if action == "read":
 
             if param == "all":
-                all_locations = location.get_all_locations()
+
+                all_locations = self.api_request(self.host, "get", "location", "all_locations", None)
 
                 if all_locations is not "Error":
                     location.display_locations(all_locations)
@@ -184,7 +193,8 @@ class PlayfieldService:
                     print("Error connecting to server")
             elif param == "by_id":
                 if not isinstance(param_data, int):
-                    location_by_id = location.get_location_by_id(param_data)
+
+                    location_by_id = self.api_request(self.host, "get", "location", "location_by_id", param_data)
 
                     # Display output unless error
                     if location_by_id is not "Error":
@@ -195,7 +205,8 @@ class PlayfieldService:
                     print("ID must be a valid integer")
             elif param == "by_name":
                 if param_data != "":
-                    location_by_name = location.get_location_by_name(param_data)
+
+                    location_by_name = self.api_request(self.host, "get", "location", "location_by_name", param_data)
 
                     # Display output unless error
                     if location_by_name is not "Error":
@@ -211,6 +222,27 @@ class PlayfieldService:
             print("Creating New Location...")
 
             location.create_new_location()
+
+    @staticmethod
+    def api_request(host, method, resource, function, data):
+
+        if method.lower() == "get" and data is not None:
+            url = f'http://{host}/api/v1/resources/{resource}/{function}/{urllib.parse.quote(data)}'
+        else:
+            url = f'http://{host}/api/v1/resources/{resource}/{function}'
+
+        try:
+            if method.lower() == "get":
+                response = requests.get(url)
+            elif method.lower() == "post":
+                response = requests.post(url, data)
+        except requests.ConnectionError as e:
+            return "Error"
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
 
 
 class Machine:
@@ -241,79 +273,6 @@ class Machine:
 
         table = Table(headers, rows)
         table.display()
-
-    def get_all_machines(self):
-        """
-        Retrieve all machines currently in the system
-        :return:
-        """
-        url = f'http://{self.host}/api/v1/resources/machine/all_machines'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_machine_by_id(self, machine_id):
-
-        url = f'http://{self.host}/api/v1/resources/machine/machine_by_id/{machine_id}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_machine_by_name(self, machine_name):
-
-        url = f'http://{self.host}/api/v1/resources/machine/machine_by_name/{machine_name}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_machine_by_abbr(self, machine_abbr):
-
-        url = f'http://{self.host}/api/v1/resources/machine/machine_by_abbr/{machine_abbr}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_machine_by_manufacturer(self, machine_manufacturer):
-
-        url = f'http://{self.host}/api/v1/resources/machine/machine_by_manufacturer/{urllib.parse.quote(machine_manufacturer)}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
 
 
 class Player:
@@ -359,52 +318,12 @@ class Player:
         table = Table(headers, rows)
         table.display()
 
-    def get_all_players(self):
-
-        url = f'http://{self.host}/api/v1/resources/player/all_players'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_player_by_id(self, player_id):
-
-        url = f'http://{self.host}/api/v1/resources/player/player_by_id/{player_id}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_player_by_name(self, player_name):
-
-        url = f'http://{self.host}/api/v1/resources/player/player_by_name/{player_name}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
     def create_new_player(self):
-        (nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents) = self._prompt_for_new_player()
+        (nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue,
+         bestfinish, activeevents) = self._prompt_for_new_player()
 
-        result = self._add_player_to_database(nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents)
+        result = self._add_player_to_database(nick, name, email, phone, location, ifpanumber, pinside, notes, status,
+                                              active, currentrank, currentwpprvalue, bestfinish, activeevents)
 
         if result is not 200:
             print("Error connecting to API")
@@ -457,7 +376,8 @@ class Player:
         else:
             exit(0)
 
-    def _add_player_to_database(self, nick, name, email, phone, location, ifpanumber, pinside, notes, status, active, currentrank, currentwpprvalue, bestfinish, activeevents):
+    def _add_player_to_database(self, nick, name, email, phone, location, ifpanumber, pinside, notes, status, active,
+                                currentrank, currentwpprvalue, bestfinish, activeevents):
         print("Adding to database...")
 
         url = f'http://{self.host}/api/v1/resources/player/add_player'
@@ -518,48 +438,6 @@ class Location:
 
         table = Table(headers, rows)
         table.display()
-
-    def get_all_locations(self):
-
-        url = f'http://{self.host}/api/v1/resources/location/all_locations'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_location_by_id(self, location_id):
-
-        url = f'http://{self.host}/api/v1/resources/location/location_by_id/{location_id}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    def get_location_by_name(self, location_name):
-
-        url = f'http://{self.host}/api/v1/resources/location/location_by_name/{location_name}'
-
-        try:
-            response = requests.get(url)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
 
     def create_new_location(self):
         (name, address, address_private, notes, loc_type, active) = self._prompt_for_new_location()
