@@ -56,7 +56,7 @@ def parse_arguments():
     :return:
     """
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=argparse.RawTextHelpFormatter,
         description=main.__doc__,
         prog='pb'
     )
