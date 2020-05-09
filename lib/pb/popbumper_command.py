@@ -3,12 +3,14 @@ from tabulate import tabulate
 import json
 import urllib.parse
 from pprint import pprint
+from playfield_service import PlayfieldService
+from table import Table
 
 
-class PlayfieldService:
+class PopbumperCommand:
 
     def __init__(self, host):
-        self.host = host
+        self.playfield = PlayfieldService(host)
 
     @staticmethod
     def action_names():
@@ -26,13 +28,13 @@ class PlayfieldService:
         :rtype: Function
         """
         mapping = {}
-        for name in PlayfieldService.resource_names():
+        for name in PopbumperCommand.resource_names():
             mapping[name] = getattr(self, "pb_" + name)
 
         return mapping
 
     def pb_system(self, action, param, param_data):
-        sys_check = SystemCheck(self.host)
+        sys_check = SystemCheck()
 
         info = sys_check.get_info()
         print(action)
@@ -70,13 +72,13 @@ class PlayfieldService:
             print("Error connecting to server")
 
     def pb_machine(self, action, param, param_data):
-        machine = Machine(self.host)
+        machine = Machine()
 
         if action == "read":
 
             if param == "all":
 
-                all_machines = self.api_request(self.host, "get", "machine", "all_machines", None)
+                all_machines = self.playfield.api_request("get", "machine", "all_machines", None)
 
                 # Display output unless error
                 if all_machines is not "Error":
@@ -86,7 +88,7 @@ class PlayfieldService:
             elif param == "by_id":
                 if not isinstance(param_data, int):
 
-                    machine_by_id = self.api_request(self.host, "get", "machine", "machine_by_id", param_data)
+                    machine_by_id = self.playfield.api_request("get", "machine", "machine_by_id", param_data)
 
                     # Display output unless error
                     if machine_by_id is not "Error":
@@ -98,7 +100,7 @@ class PlayfieldService:
             elif param == "by_name":
                 if param_data != "":
 
-                    machine_by_name = self.api_request(self.host, "get", "machine", "machine_by_name", param_data)
+                    machine_by_name = self.playfield.api_request("get", "machine", "machine_by_name", param_data)
 
                     # Display output unless error
                     if machine_by_name is not "Error":
@@ -110,7 +112,7 @@ class PlayfieldService:
             elif param == "by_abbr":
                 if param_data != "":
 
-                    machine_by_abbr = self.api_request(self.host, "get", "machine", "machine_by_abbr", param_data)
+                    machine_by_abbr = self.playfield.api_request("get", "machine", "machine_by_abbr", param_data)
 
                     # Display output unless error
                     if machine_by_abbr is not "Error":
@@ -122,7 +124,7 @@ class PlayfieldService:
             elif param == "by_manufacturer":
                 if param_data != "":
 
-                    machine_by_manufacturer = self.api_request(self.host, "get", "machine", "machine_by_manufacturer", param_data)
+                    machine_by_manufacturer = self.playfield.api_request("get", "machine", "machine_by_manufacturer", param_data)
 
                     # Display output unless error
                     if machine_by_manufacturer is not "Error":
@@ -135,13 +137,13 @@ class PlayfieldService:
                 print("Invalid Operation")
 
     def pb_player(self, action, param, param_data):
-        player = Player(self.host)
+        player = Player()
 
         if action == "read":
 
             if param == "all":
 
-                all_players = self.api_request(self.host, "get", "player", "all_players", None)
+                all_players = self.playfield.api_request("get", "player", "all_players", None)
 
                 if all_players is not "Error":
                     player.display_players(all_players)
@@ -150,7 +152,7 @@ class PlayfieldService:
             elif param == "by_id":
                 if not isinstance(param_data, int):
 
-                    player_by_id = self.api_request(self.host, "get", "player", "player_by_id", param_data)
+                    player_by_id = self.playfield.api_request("get", "player", "player_by_id", param_data)
 
                     # Display output unless error
                     if player_by_id is not "Error":
@@ -162,7 +164,7 @@ class PlayfieldService:
             elif param == "by_name":
                 if param_data != "":
 
-                    player_by_name = self.api_request(self.host, "get", "player", "player_by_name", param_data)
+                    player_by_name = self.playfield.api_request("get", "player", "player_by_name", param_data)
 
                     # Display output unless error
                     if player_by_name is not "Error":
@@ -179,13 +181,13 @@ class PlayfieldService:
             player.create_new_player()
 
     def pb_location(self, action, param, param_data):
-        location = Location(self.host)
+        location = Location()
 
         if action == "read":
 
             if param == "all":
 
-                all_locations = self.api_request(self.host, "get", "location", "all_locations", None)
+                all_locations = self.playfield.api_request("get", "location", "all_locations", None)
 
                 if all_locations is not "Error":
                     location.display_locations(all_locations)
@@ -194,7 +196,7 @@ class PlayfieldService:
             elif param == "by_id":
                 if not isinstance(param_data, int):
 
-                    location_by_id = self.api_request(self.host, "get", "location", "location_by_id", param_data)
+                    location_by_id = self.playfield.api_request("get", "location", "location_by_id", param_data)
 
                     # Display output unless error
                     if location_by_id is not "Error":
@@ -206,7 +208,7 @@ class PlayfieldService:
             elif param == "by_name":
                 if param_data != "":
 
-                    location_by_name = self.api_request(self.host, "get", "location", "location_by_name", param_data)
+                    location_by_name = self.playfield.api_request("get", "location", "location_by_name", param_data)
 
                     # Display output unless error
                     if location_by_name is not "Error":
@@ -223,32 +225,8 @@ class PlayfieldService:
 
             location.create_new_location()
 
-    @staticmethod
-    def api_request(host, method, resource, function, data):
-
-        if method.lower() == "get" and data is not None:
-            url = f'http://{host}/api/v1/resources/{resource}/{function}/{urllib.parse.quote(data)}'
-        else:
-            url = f'http://{host}/api/v1/resources/{resource}/{function}'
-
-        try:
-            if method.lower() == "get":
-                response = requests.get(url)
-            elif method.lower() == "post":
-                response = requests.post(url, data)
-        except requests.ConnectionError as e:
-            return "Error"
-
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
 
 class Machine:
-    def __init__(self, host):
-        self.host = host
-
     @staticmethod
     def display_machines(machine_data):
         headers = [
@@ -276,9 +254,6 @@ class Machine:
 
 
 class Player:
-    def __init__(self, host):
-        self.host = host
-
     @staticmethod
     def display_players(player_data):
         headers = [
@@ -405,9 +380,6 @@ class Player:
 
 
 class Location:
-    def __init__(self, host):
-        self.host = host
-
     @staticmethod
     def display_locations(location_data):
         headers = [
@@ -520,9 +492,6 @@ class Location:
 
 
 class SystemCheck:
-    def __init__(self, host):
-        self.host = host
-
     def get_info(self):
         info_url = f"http://{self.host}/"
 
@@ -578,17 +547,3 @@ class SystemCheck:
             return "OK"
         else:
             return "NOT OK"
-
-
-class Table:
-    def __init__(self, headers, data):
-        self.headers = headers
-        self.data = data
-
-    def display(self, fmt=None):
-        """
-        Display data in tabular format with headers using tabulate
-        :param fmt:
-        :return:
-        """
-        print(tabulate(self.data, headers=self.headers, tablefmt="plain"))

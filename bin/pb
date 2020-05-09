@@ -6,7 +6,7 @@ import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../lib/pb"))
-import pb  # noqa: E402
+from popbumper_command import PopbumperCommand  # noqa: E402
 
 
 def main(args, raw_args):
@@ -27,11 +27,11 @@ def main(args, raw_args):
     else:
         host = args.host + ":" + args.port
 
-    playfield_service = pb.PlayfieldService(host)
+    popbumper_command = PopbumperCommand(host)
 
     param, param_data = parse_raw_args(raw_args)
 
-    operation = playfield_service.playfield_operations()[args.resource]
+    operation = popbumper_command.playfield_operations()[args.resource]
     operation(args.action, param, param_data)
 
     exit(0)
@@ -62,13 +62,13 @@ def parse_arguments():
     )
     parser.add_argument(
         "resource",
-        choices=pb.PlayfieldService.resource_names(),
-        help=f"Resource to inspect {pb.PlayfieldService.resource_names()}",
+        choices=PopbumperCommand.resource_names(),
+        help=f"Resource to inspect {PopbumperCommand.resource_names()}",
     )
     parser.add_argument(
         "action",
-        choices=pb.PlayfieldService.action_names(),
-        help=f"Action to take {pb.PlayfieldService.action_names()}",
+        choices=PopbumperCommand.action_names(),
+        help=f"Action to take {PopbumperCommand.action_names()}",
     )
 
     parser.add_argument("--host", help="API hostname", default="127.0.0.1")
