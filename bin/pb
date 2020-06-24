@@ -71,9 +71,9 @@ def parse_arguments():
         help=f"Action to take {PopbumperCommand.action_names()}",
     )
 
-    parser.add_argument("--host", help="API hostname", default="127.0.0.1")
-    parser.add_argument("--port", help="API port", default="8080")
-    parser.add_argument("--verbose", help="Expand output to include everything")
+    parser.add_argument('-H', '--host', default="127.0.0.1", help="API hostname")
+    parser.add_argument('-p', '--port', default="8080", help="API port")
+    parser.add_argument('-v', '--verbose', action="count", default=0, help="Expand output to include everything")
 
     args, extra_args = parser.parse_known_args()
     return args, extra_args
