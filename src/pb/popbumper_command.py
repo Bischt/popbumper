@@ -3,8 +3,8 @@ from tabulate import tabulate
 import json
 import urllib.parse
 from pprint import pprint
-from playfield_service import PlayfieldService
-from table import Table
+from pb.playfield_service import PlayfieldService
+from pb.table import Table
 
 
 class PopbumperCommand:

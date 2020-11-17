@@ -7,6 +7,14 @@ Description:
 Command line client for the playfield API.  Used primarily to develop and test the API but could also be used as a 
 simple command line client.
 
+Install:
+--------
+1. Clone repo
+2. `brew install pyenv-virtualenv`
+3. Add `eval "$(pyenv init -)"` in shell profile
+4. Add `eval "$(pyenv virtualenv-init -)"` in shell profile
+5. In new shell: `cd pb && make devinstall`
+
 Usage:
 ------
 `pb help` - Display help
