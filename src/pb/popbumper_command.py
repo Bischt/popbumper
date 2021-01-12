@@ -81,7 +81,7 @@ class PopbumperCommand:
                 all_machines = self.playfield.api_request("get", "machine", "all_machines", None)
 
                 # Display output unless error
-                if all_machines is not "Error":
+                if all_machines != "Error":
                     machine.display_machines(all_machines)
                 else:
                     print("Error connecting to server")
@@ -91,7 +91,7 @@ class PopbumperCommand:
                     machine_by_id = self.playfield.api_request("get", "machine", "machine_by_id", param_data)
 
                     # Display output unless error
-                    if machine_by_id is not "Error":
+                    if machine_by_id != "Error":
                         machine.display_machines(machine_by_id)
                     else:
                         print("Error connecting to server")
@@ -103,7 +103,7 @@ class PopbumperCommand:
                     machine_by_name = self.playfield.api_request("get", "machine", "machine_by_name", param_data)
 
                     # Display output unless error
-                    if machine_by_name is not "Error":
+                    if machine_by_name != "Error":
                         machine.display_machines(machine_by_name)
                     else:
                         print("Error connecting to server")
@@ -115,7 +115,7 @@ class PopbumperCommand:
                     machine_by_abbr = self.playfield.api_request("get", "machine", "machine_by_abbr", param_data)
 
                     # Display output unless error
-                    if machine_by_abbr is not "Error":
+                    if machine_by_abbr != "Error":
                         machine.display_machines(machine_by_abbr)
                     else:
                         print("Error connecting to server")
@@ -127,7 +127,7 @@ class PopbumperCommand:
                     machine_by_manufacturer = self.playfield.api_request("get", "machine", "machine_by_manufacturer", param_data)
 
                     # Display output unless error
-                    if machine_by_manufacturer is not "Error":
+                    if machine_by_manufacturer != "Error":
                         machine.display_machines(machine_by_manufacturer)
                     else:
                         print("Error connecting to server")
@@ -145,7 +145,7 @@ class PopbumperCommand:
 
                 all_players = self.playfield.api_request("get", "player", "all_players", None)
 
-                if all_players is not "Error":
+                if all_players != "Error":
                     player.display_players(all_players)
                 else:
                     print("Error connecting to server")
@@ -155,7 +155,7 @@ class PopbumperCommand:
                     player_by_id = self.playfield.api_request("get", "player", "player_by_id", param_data)
 
                     # Display output unless error
-                    if player_by_id is not "Error":
+                    if player_by_id != "Error":
                         player.display_players(player_by_id)
                     else:
                         print("Error connecting to server")
@@ -167,7 +167,7 @@ class PopbumperCommand:
                     player_by_name = self.playfield.api_request("get", "player", "player_by_name", param_data)
 
                     # Display output unless error
-                    if player_by_name is not "Error":
+                    if player_by_name != "Error":
                         player.display_players(player_by_name)
                     else:
                         print("Error connecting to server")
@@ -189,7 +189,7 @@ class PopbumperCommand:
 
                 all_locations = self.playfield.api_request("get", "location", "all_locations", None)
 
-                if all_locations is not "Error":
+                if all_locations != "Error":
                     location.display_locations(all_locations)
                 else:
                     print("Error connecting to server")
@@ -199,7 +199,7 @@ class PopbumperCommand:
                     location_by_id = self.playfield.api_request("get", "location", "location_by_id", param_data)
 
                     # Display output unless error
-                    if location_by_id is not "Error":
+                    if location_by_id != "Error":
                         location.display_locations(location_by_id)
                     else:
                         print("Error connecting to server")
@@ -211,7 +211,7 @@ class PopbumperCommand:
                     location_by_name = self.playfield.api_request("get", "location", "location_by_name", param_data)
 
                     # Display output unless error
-                    if location_by_name is not "Error":
+                    if location_by_name != "Error":
                         location.display_locations(location_by_name)
                     else:
                         print("Error connecting to server")
@@ -300,7 +300,7 @@ class Player:
         result = self._add_player_to_database(nick, name, email, phone, location, ifpanumber, pinside, notes, status,
                                               active, currentrank, currentwpprvalue, bestfinish, activeevents)
 
-        if result is not 200:
+        if result != 200:
             print("Error connecting to API")
         else:
             print("Player added successfully!")
@@ -416,7 +416,7 @@ class Location:
 
         result = self._add_to_database(name, address, address_private, notes, loc_type, active)
 
-        if result is not 200:
+        if result != 200:
             print("Error connecting to API")
         else:
             print("Location added successfully!")
